@@ -1,0 +1,27 @@
+#include <QLoggingCategory>
+#include <asio.hpp>
+
+#include <esp_log.h>
+
+#include "examplewebserver.h"
+
+int main(int argc, char *argv[])
+{
+    qSetMessagePattern(QStringLiteral("%{time dd.MM.yyyy HH:mm:ss.zzz} "
+                                      "["
+                                      "%{if-debug}D%{endif}"
+                                      "%{if-info}I%{endif}"
+                                      "%{if-warning}W%{endif}"
+                                      "%{if-critical}C%{endif}"
+                                      "%{if-fatal}F%{endif}"
+                                      "] "
+                                      "%{function}(): "
+                                      "%{message}"));
+
+    asio::io_context io_context;
+    ExampleWebserver server{io_context, (short int)8080};
+
+    ESP_LOGI("running mainloop");
+
+    io_context.run();
+}
