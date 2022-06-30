@@ -38,21 +38,22 @@ void RootResponseHandler::sendResponse()
     ESP_LOGI(TAG, "sending response for (%s:%hi)",
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 
-    m_response = fmt::format("<html>"
-                                 "<head>"
-                                     "<title>asio test webserver</title>"
-                                 "</head>"
-                                 "<body>"
-                                     "<h1>asio test webserver</h1>"
-                                     "<ul>"
-                                         "<li><a href=\"/debug\">Debug</a></li>"
-                                         "<li><a href=\"/chunked\">Chunked</a></li>"
-                                     "</ul>"
-                                 "</body>"
-                             "</html>");
+    m_response = "<html>"
+                     "<head>"
+                         "<title>asio test webserver</title>"
+                     "</head>"
+                     "<body>"
+                         "<h1>asio test webserver</h1>"
+                         "<ul>"
+                             "<li><a href=\"/debug\">Debug</a></li>"
+                             "<li><a href=\"/chunked\">Chunked</a></li>"
+                             "<li><a href=\"/websocket\">Websocket</a></li>"
+                         "</ul>"
+                     "</body>"
+                 "</html>";
 
     m_response = fmt::format("HTTP/1.1 200 Ok\r\n"
-                             "Connection: close\r\n"
+                             "Connection: keep-alive\r\n"
                              "Content-Type: text/html\r\n"
                              "Content-Length: {}\r\n"
                              "\r\n"

@@ -27,10 +27,13 @@ public:
 
     void start();
     void responseFinished(std::error_code ec);
+    void upgradeWebsocket();
 
 private:
     void doRead();
+    void doReadWebSocket();
     void readyRead(std::error_code ec, std::size_t length);
+    void readyReadWebSocket(std::error_code ec, std::size_t length);
     bool parseRequestLine(std::string_view line);
     bool readyReadLine(std::string_view line);
     bool parseRequestHeader(std::string_view line);
@@ -39,12 +42,12 @@ private:
     asio::ip::tcp::socket m_socket;
     const asio::ip::tcp::endpoint m_remote_endpoint;
 
-    static constexpr const std::size_t max_length = 128;
+    static constexpr const std::size_t max_length = 1024;
     char m_receiveBuffer[max_length];
 
     std::string m_parsingBuffer;
 
-    enum class State { RequestLine, RequestHeaders, RequestBody, Response };
+    enum class State { RequestLine, RequestHeaders, RequestBody, Response, WebSocket };
     State m_state { State::RequestLine };
 
     std::size_t m_requestBodySize{};

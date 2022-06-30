@@ -9,7 +9,9 @@ HEADERS += \
     debugresponsehandler.h \
     errorresponsehandler.h \
     examplewebserver.h \
-    rootresponsehandler.h
+    rootresponsehandler.h \
+    websocketbackendresponsehandler.h \
+    websocketfrontendresponsehandler.h
 
 SOURCES += \
     chunkedresponsehandler.cpp \
@@ -17,7 +19,9 @@ SOURCES += \
     errorresponsehandler.cpp \
     examplewebserver.cpp \
     main.cpp \
-    rootresponsehandler.cpp
+    rootresponsehandler.cpp \
+    websocketbackendresponsehandler.cpp \
+    websocketfrontendresponsehandler.cpp
 
 unix: TARGET=webserver_example.bin
 DESTDIR=$${OUT_PWD}/..
@@ -32,3 +36,5 @@ unix: {
 }
 LIBS += -L$${OUT_PWD}/..
 LIBS += -lasio_webserver
+
+LIBS += -lssl -lcrypto

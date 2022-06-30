@@ -64,11 +64,26 @@ void ClientConnection::responseFinished(std::error_code ec)
         m_socket.close();
 }
 
+void ClientConnection::upgradeWebsocket()
+{
+//    ESP_LOGD(TAG, "state changed to RequestLine");
+    m_state = State::WebSocket;
+
+    doReadWebSocket();
+}
+
 void ClientConnection::doRead()
 {
     m_socket.async_read_some(asio::buffer(m_receiveBuffer, max_length),
                              [this, self=shared_from_this()](std::error_code ec, std::size_t length)
                              { readyRead(ec, length); });
+}
+
+void ClientConnection::doReadWebSocket()
+{
+    m_socket.async_read_some(asio::buffer(m_receiveBuffer, max_length),
+                             [this, self=shared_from_this()](std::error_code ec, std::size_t length)
+                             { readyReadWebSocket(ec, length); });
 }
 
 void ClientConnection::readyRead(std::error_code ec, std::size_t length)
@@ -119,7 +134,7 @@ requestFinished:
         }
     }
 
-//    ESP_LOGV(TAG, "received: %zd \"%.*s\"", length, length, m_data);
+//    ESP_LOGV(TAG, "received: %zd \"%.*s\"", length, length, m_receiveBuffer);
     m_parsingBuffer.append(m_receiveBuffer, length);
 
     bool shouldDoRead{true};
@@ -143,6 +158,20 @@ requestFinished:
 
     if (shouldDoRead)
         doRead();
+}
+
+void ClientConnection::readyReadWebSocket(std::error_code ec, std::size_t length)
+{
+    if (ec)
+    {
+        ESP_LOGI(TAG, "error: %i %s (%s:%hi)", ec.value(), ec.message().c_str(),
+                 m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
+        return;
+    }
+
+    ESP_LOGV(TAG, "received: %zd \"%.*s\"", length, length, m_receiveBuffer);
+
+    doReadWebSocket();
 }
 
 bool ClientConnection::readyReadLine(std::string_view line)

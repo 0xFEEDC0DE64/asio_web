@@ -42,7 +42,7 @@ void ErrorResponseHandler::sendResponse()
     m_response = fmt::format("Error 404 Not Found: {}", m_path);
 
     m_response = fmt::format("HTTP/1.1 404 Not Found\r\n"
-                             "Connection: close\r\n"
+                             "Connection: keep-alive\r\n"
                              "Content-Type: text/plain\r\n"
                              "Content-Length: {}\r\n"
                              "\r\n"

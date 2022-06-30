@@ -103,6 +103,13 @@ void DebugResponseHandler::sendResponse()
                                              "<button type=\"submit\">Go</button>"
                                          "</fieldset>"
                                      "</form>"
+                                     "<form method=\"POST\" enctype=\"multipart/form-data\">"
+                                         "<fieldset>"
+                                             "<legend>POST form with multipart form-data and file upload</legend>"
+                                             "<label>File-Upload: <input type=\"file\" name=\"inputName\" /></label>"
+                                             "<button type=\"submit\">Go</button>"
+                                         "</fieldset>"
+                                     "</form>"
                                  "</body>"
                              "</html>";
 

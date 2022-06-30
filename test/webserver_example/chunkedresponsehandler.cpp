@@ -39,7 +39,7 @@ void ChunkedResponseHandler::sendResponse()
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 
     m_response = fmt::format("HTTP/1.1 200 Ok\r\n"
-                             "Connection: close\r\n"
+                             "Connection: keep-alive\r\n"
                              "Content-Type: text/html\r\n"
                              "Transfer-Encoding: chunked\r\n"
                              "\r\n");

@@ -8,6 +8,8 @@
 #include "debugresponsehandler.h"
 #include "chunkedresponsehandler.h"
 #include "errorresponsehandler.h"
+#include "websocketfrontendresponsehandler.h"
+#include "websocketbackendresponsehandler.h"
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -15,6 +17,8 @@ constexpr const char * const TAG = "ASIO_WEBSERVER";
 
 std::unique_ptr<ResponseHandler> ExampleWebserver::makeResponseHandler(ClientConnection &clientConnection, std::string_view method, std::string_view path, std::string_view protocol)
 {
+    ESP_LOGI(TAG, "method=\"%.*s\" path=\"%.*s\" protocol=\"%.*s\"",
+             method.size(), method.data(), path.size(), path.data(), protocol.size(), protocol.data());
     const std::string_view processedPath{[&](){
         const auto index = path.find('?');
         return index == std::string_view::npos ?
@@ -27,6 +31,10 @@ std::unique_ptr<ResponseHandler> ExampleWebserver::makeResponseHandler(ClientCon
         return std::make_unique<DebugResponseHandler>(clientConnection, method, path, protocol);
     else if (processedPath == "/chunked")
         return std::make_unique<ChunkedResponseHandler>(clientConnection);
+    else if (processedPath == "/websocket")
+        return std::make_unique<WebsocketFrontendResponseHandler>(clientConnection);
+    else if (processedPath == "/ws")
+        return std::make_unique<WebsocketBackendResponseHandler>(clientConnection);
     else
         return std::make_unique<ErrorResponseHandler>(clientConnection, path);
 }
