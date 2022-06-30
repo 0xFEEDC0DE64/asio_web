@@ -7,6 +7,7 @@
 // 3rdparty lib includes
 #include <fmt/core.h>
 #include <asio_webserver/clientconnection.h>
+#include <asio_webserver/webserver.h>
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -15,13 +16,13 @@ constexpr const char * const TAG = "ASIO_WEBSERVER";
 ChunkedResponseHandler::ChunkedResponseHandler(ClientConnection &clientConnection) :
     m_clientConnection{clientConnection}
 {
-    ESP_LOGI(TAG, "constructed for (%s:%hi)",
+    ESP_LOGV(TAG, "constructed for (%s:%hi)",
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 ChunkedResponseHandler::~ChunkedResponseHandler()
 {
-    ESP_LOGI(TAG, "destructed for (%s:%hi)",
+    ESP_LOGV(TAG, "destructed for (%s:%hi)",
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
@@ -39,10 +40,11 @@ void ChunkedResponseHandler::sendResponse()
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 
     m_response = fmt::format("HTTP/1.1 200 Ok\r\n"
-                             "Connection: keep-alive\r\n"
+                             "Connection: {}\r\n"
                              "Content-Type: text/html\r\n"
                              "Transfer-Encoding: chunked\r\n"
-                             "\r\n");
+                             "\r\n",
+                             m_clientConnection.webserver().connectionKeepAlive() ? "keep-alive" : "close");
 
     asio::async_write(m_clientConnection.socket(),
                       asio::buffer(m_response.data(), m_response.size()),

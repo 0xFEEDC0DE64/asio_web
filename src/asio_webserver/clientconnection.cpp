@@ -53,7 +53,7 @@ void ClientConnection::responseFinished(std::error_code ec)
         return;
     }
 
-    if constexpr (true) // Connection: Keep
+    if (m_webserver.connectionKeepAlive())
     {
 //        ESP_LOGD(TAG, "state changed to RequestLine");
         m_state = State::RequestLine;

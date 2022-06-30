@@ -8,8 +8,7 @@
 #include "debugresponsehandler.h"
 #include "chunkedresponsehandler.h"
 #include "errorresponsehandler.h"
-#include "websocketfrontendresponsehandler.h"
-#include "websocketbackendresponsehandler.h"
+#include "websocketresponsehandler.h"
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -31,10 +30,8 @@ std::unique_ptr<ResponseHandler> ExampleWebserver::makeResponseHandler(ClientCon
         return std::make_unique<DebugResponseHandler>(clientConnection, method, path, protocol);
     else if (processedPath == "/chunked")
         return std::make_unique<ChunkedResponseHandler>(clientConnection);
-    else if (processedPath == "/websocket")
-        return std::make_unique<WebsocketFrontendResponseHandler>(clientConnection);
     else if (processedPath == "/ws")
-        return std::make_unique<WebsocketBackendResponseHandler>(clientConnection);
+        return std::make_unique<WebsocketResponseHandler>(clientConnection);
     else
         return std::make_unique<ErrorResponseHandler>(clientConnection, path);
 }

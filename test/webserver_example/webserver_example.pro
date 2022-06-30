@@ -10,8 +10,7 @@ HEADERS += \
     errorresponsehandler.h \
     examplewebserver.h \
     rootresponsehandler.h \
-    websocketbackendresponsehandler.h \
-    websocketfrontendresponsehandler.h
+    websocketresponsehandler.h
 
 SOURCES += \
     chunkedresponsehandler.cpp \
@@ -20,8 +19,7 @@ SOURCES += \
     examplewebserver.cpp \
     main.cpp \
     rootresponsehandler.cpp \
-    websocketbackendresponsehandler.cpp \
-    websocketfrontendresponsehandler.cpp
+    websocketresponsehandler.cpp
 
 unix: TARGET=webserver_example.bin
 DESTDIR=$${OUT_PWD}/..

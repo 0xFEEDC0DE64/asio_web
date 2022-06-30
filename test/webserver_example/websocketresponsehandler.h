@@ -13,19 +13,20 @@
 // forward declarations
 class ClientConnection;
 
-class WebsocketBackendResponseHandler final : public ResponseHandler
+class WebsocketResponseHandler final : public ResponseHandler
 {
 public:
-    WebsocketBackendResponseHandler(ClientConnection &clientConnection);
-    ~WebsocketBackendResponseHandler() override;
+    WebsocketResponseHandler(ClientConnection &clientConnection);
+    ~WebsocketResponseHandler() override;
 
     void requestHeaderReceived(std::string_view key, std::string_view value) final;
     void requestBodyReceived(std::string_view body) final;
     void sendResponse() final;
 
 private:
-    void writtenError(std::error_code ec, std::size_t length);
-    void written(std::error_code ec, std::size_t length);
+    void writtenHtmlHeader(std::error_code ec, std::size_t length);
+    void writtenHtml(std::error_code ec, std::size_t length);
+    void writtenWebsocket(std::error_code ec, std::size_t length);
 
     ClientConnection &m_clientConnection;
 

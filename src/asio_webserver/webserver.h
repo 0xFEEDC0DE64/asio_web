@@ -18,6 +18,8 @@ public:
     Webserver(asio::io_context& io_context, unsigned short port);
     virtual ~Webserver() = default;
 
+    virtual bool connectionKeepAlive() const = 0;
+
     virtual std::unique_ptr<ResponseHandler> makeResponseHandler(ClientConnection &clientConnection, std::string_view method, std::string_view path, std::string_view protocol) = 0;
 
 protected:

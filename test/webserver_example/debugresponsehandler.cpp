@@ -7,6 +7,7 @@
 // 3rdparty lib includes
 #include <fmt/core.h>
 #include <asio_webserver/clientconnection.h>
+#include <asio_webserver/webserver.h>
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -114,10 +115,12 @@ void DebugResponseHandler::sendResponse()
                              "</html>";
 
     m_response = fmt::format("HTTP/1.1 200 Ok\r\n"
+                             "Connection: {}\r\n"
                              "Content-Type: text/html\r\n"
                              "Content-Length: {}\r\n"
                              "\r\n"
                              "{}",
+                             m_clientConnection.webserver().connectionKeepAlive() ? "keep-alive" : "close",
                              m_response.size(), m_response);
 
     asio::async_write(m_clientConnection.socket(),

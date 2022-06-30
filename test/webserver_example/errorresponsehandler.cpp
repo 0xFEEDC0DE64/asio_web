@@ -7,6 +7,7 @@
 // 3rdparty lib includes
 #include <fmt/core.h>
 #include <asio_webserver/clientconnection.h>
+#include <asio_webserver/webserver.h>
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -42,11 +43,13 @@ void ErrorResponseHandler::sendResponse()
     m_response = fmt::format("Error 404 Not Found: {}", m_path);
 
     m_response = fmt::format("HTTP/1.1 404 Not Found\r\n"
-                             "Connection: keep-alive\r\n"
+                             "Connection: {}\r\n"
                              "Content-Type: text/plain\r\n"
                              "Content-Length: {}\r\n"
                              "\r\n"
-                             "{}", m_response.size(), m_response);
+                             "{}",
+                             m_clientConnection.webserver().connectionKeepAlive() ? "keep-alive" : "close",
+                             m_response.size(), m_response);
 
     asio::async_write(m_clientConnection.socket(),
                       asio::buffer(m_response.data(), m_response.size()),
