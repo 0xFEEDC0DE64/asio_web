@@ -5,12 +5,14 @@ QT += core
 CONFIG += c++latest
 
 HEADERS += \
+    chunkedresponsehandler.h \
     debugresponsehandler.h \
     errorresponsehandler.h \
     examplewebserver.h \
     rootresponsehandler.h
 
 SOURCES += \
+    chunkedresponsehandler.cpp \
     debugresponsehandler.cpp \
     errorresponsehandler.cpp \
     examplewebserver.cpp \

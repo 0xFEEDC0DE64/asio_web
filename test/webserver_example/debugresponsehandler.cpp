@@ -107,8 +107,17 @@ void DebugResponseHandler::sendResponse()
 
 void DebugResponseHandler::written(std::error_code ec, std::size_t length)
 {
+    if (ec)
+    {
+        ESP_LOGW(TAG, "error: %i (%s:%hi)", ec.value(),
+                 m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+        m_clientConnection.responseFinished(ec);
+        return;
+    }
+
     ESP_LOGI(TAG, "expected=%zd actual=%zd for %.*s %.*s (%s:%hi)", m_response.size(), length,
              m_method.size(), m_method.data(), m_path.size(), m_path.data(),
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+
     m_clientConnection.responseFinished(ec);
 }

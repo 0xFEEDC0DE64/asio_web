@@ -1,15 +1,17 @@
 #include "webserver.h"
 
+// esp-idf includes
 #include <esp_log.h>
 
+// local includes
 #include "clientconnection.h"
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
 } // namespace
 
-Webserver::Webserver(asio::io_context &io_context, short port)
-    : m_acceptor{io_context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), port)}
+Webserver::Webserver(asio::io_context &io_context, unsigned short port) :
+    m_acceptor{io_context, asio::ip::tcp::endpoint{asio::ip::tcp::v4(), port}}
 {
     ESP_LOGI(TAG, "create webserver on port %hi", port);
 

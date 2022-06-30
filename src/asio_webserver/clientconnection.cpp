@@ -1,10 +1,13 @@
 #include "clientconnection.h"
 
+// system includes
 #include <cstdio>
 #include <utility>
 
+// esp-idf includes
 #include <esp_log.h>
 
+// local includes
 #include "webserver.h"
 #include "responsehandler.h"
 
@@ -19,12 +22,16 @@ ClientConnection::ClientConnection(Webserver &webserver, asio::ip::tcp::socket s
 {
     ESP_LOGI(TAG, "new client (%s:%hi)",
              m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
+
+    m_webserver.m_clients++;
 }
 
 ClientConnection::~ClientConnection()
 {
     ESP_LOGI(TAG, "client destroyed (%s:%hi)",
              m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
+
+    m_webserver.m_clients--;
 }
 
 void ClientConnection::start()
@@ -42,7 +49,7 @@ void ClientConnection::responseFinished(std::error_code ec)
         return;
     }
 
-    if constexpr (false) // Connection: Keep
+    if constexpr (true) // Connection: Keep
     {
 //        ESP_LOGD(TAG, "state changed to RequestLine");
         m_state = State::RequestLine;
