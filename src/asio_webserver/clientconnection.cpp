@@ -7,6 +7,10 @@
 // esp-idf includes
 #include <esp_log.h>
 
+// 3rdparty lib includes
+#include <numberparsing.h>
+#include <strutils.h>
+
 // local includes
 #include "webserver.h"
 #include "responsehandler.h"
@@ -76,6 +80,45 @@ void ClientConnection::readyRead(std::error_code ec, std::size_t length)
         return;
     }
 
+    if (m_state == State::RequestBody)
+    {
+        if (!m_responseHandler)
+        {
+            ESP_LOGW(TAG, "invalid response handler (%s:%hi)",
+                     m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
+            m_socket.close();
+            return;
+        }
+
+        if (!m_requestBodySize)
+            goto requestFinished;
+        else
+        {
+            if (length <= m_requestBodySize)
+            {
+                m_responseHandler->requestBodyReceived({m_receiveBuffer, length});
+                m_requestBodySize -= length;
+                length = 0;
+
+                if (!m_requestBodySize)
+                    goto requestFinished;
+            }
+            else
+            {
+                m_responseHandler->requestBodyReceived({m_receiveBuffer, m_requestBodySize});
+                // TODO how to erase from m_receiveBuffer ?
+                m_requestBodySize = 0;
+                goto requestFinished;
+            }
+
+requestFinished:
+//            ESP_LOGV(TAG, "state changed to Response");
+            m_state = State::Response;
+
+            m_responseHandler->sendResponse();
+        }
+    }
+
 //    ESP_LOGV(TAG, "received: %zd \"%.*s\"", length, length, m_data);
     m_parsingBuffer.append(m_receiveBuffer, length);
 
@@ -88,14 +131,14 @@ void ClientConnection::readyRead(std::error_code ec, std::size_t length)
         if (index == std::string::npos)
             break;
 
-        std::string_view line{m_parsingBuffer.data(), index};
+        std::string line{m_parsingBuffer.data(), index};
 
 //        ESP_LOGD(TAG, "line: %zd \"%.*s\"", line.size(), line.size(), line.data());
 
+        m_parsingBuffer.erase(std::begin(m_parsingBuffer), std::next(std::begin(m_parsingBuffer), line.size() + newLine.size()));
+
         if (!readyReadLine(line))
             shouldDoRead = false;
-
-        m_parsingBuffer.erase(std::begin(m_parsingBuffer), std::next(std::begin(m_parsingBuffer), line.size() + newLine.size()));
     }
 
     if (shouldDoRead)
@@ -195,6 +238,19 @@ bool ClientConnection::parseRequestHeader(std::string_view line)
 
 //            ESP_LOGD(TAG, "header key=\"%.*s\" value=\"%.*s\"", key.size(), key.data(), value.size(), value.data());
 
+            if (cpputils::stringEqualsIgnoreCase(key, "Content-Length"))
+            {
+                if (const auto parsed = cpputils::fromString<std::size_t>(value); !parsed)
+                {
+                    ESP_LOGW(TAG, "invalid Content-Length %.*s %.*s", value.size(), value.data(),
+                             parsed.error().size(), parsed.error().data());
+                    m_socket.close();
+                    return false;
+                }
+                else
+                    m_requestBodySize = *parsed;
+            }
+
             if (!m_responseHandler)
             {
                 ESP_LOGW(TAG, "invalid response handler (%s:%hi)",
@@ -209,19 +265,52 @@ bool ClientConnection::parseRequestHeader(std::string_view line)
     }
     else
     {
-//        ESP_LOGV(TAG, "state changed to Response");
-        m_state = State::Response;
-
         if (!m_responseHandler)
         {
-            ESP_LOGW(TAG, "invalid response handler ESP_LOGI",
+            ESP_LOGW(TAG, "invalid response handler (%s:%hi)",
                      m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
             m_socket.close();
             return false;
         }
 
-        m_responseHandler->sendResponse();
+        if (m_requestBodySize)
+        {
+//            ESP_LOGV(TAG, "state changed to RequestBody");
+            m_state = State::RequestBody;
 
-        return false;
+            if (!m_parsingBuffer.empty())
+            {
+                if (m_parsingBuffer.size() <= m_requestBodySize)
+                {
+                    m_responseHandler->requestBodyReceived(m_parsingBuffer);
+                    m_requestBodySize -= m_parsingBuffer.size();
+                    m_parsingBuffer.clear();
+
+                    if (!m_requestBodySize)
+                        goto requestFinished;
+
+                    return true;
+                }
+                else
+                {
+                    m_responseHandler->requestBodyReceived({m_parsingBuffer.data(), m_requestBodySize});
+                    m_parsingBuffer.erase(std::begin(m_parsingBuffer), std::next(std::begin(m_parsingBuffer), m_requestBodySize));
+                    m_requestBodySize = 0;
+                    goto requestFinished;
+                }
+            }
+            else
+                return true;
+        }
+        else
+        {
+requestFinished:
+//            ESP_LOGV(TAG, "state changed to Response");
+            m_state = State::Response;
+
+            m_responseHandler->sendResponse();
+
+            return false;
+        }
     }
 }

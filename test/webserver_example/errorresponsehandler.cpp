@@ -30,6 +30,10 @@ void ErrorResponseHandler::requestHeaderReceived(std::string_view key, std::stri
 {
 }
 
+void ErrorResponseHandler::requestBodyReceived(std::string_view body)
+{
+}
+
 void ErrorResponseHandler::sendResponse()
 {
     ESP_LOGI(TAG, "sending response for %.*s (%s:%hi)", m_path.size(), m_path.data(),

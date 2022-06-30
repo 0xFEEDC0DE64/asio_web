@@ -13,13 +13,14 @@
 // forward declarations
 class ClientConnection;
 
-class DebugResponseHandler : public ResponseHandler
+class DebugResponseHandler final : public ResponseHandler
 {
 public:
     DebugResponseHandler(ClientConnection &clientConnection, std::string_view method, std::string_view path, std::string_view protocol);
-    ~DebugResponseHandler() override;
+    ~DebugResponseHandler() final;
 
     void requestHeaderReceived(std::string_view key, std::string_view value) final;
+    void requestBodyReceived(std::string_view body) final;
     void sendResponse() final;
 
 private:
@@ -31,6 +32,8 @@ private:
     std::string m_protocol;
 
     std::vector<std::pair<std::string, std::string>> m_requestHeaders;
+
+    std::string m_requestBody;
 
     std::string m_response;
 };

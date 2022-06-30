@@ -29,6 +29,10 @@ void RootResponseHandler::requestHeaderReceived(std::string_view key, std::strin
 {
 }
 
+void RootResponseHandler::requestBodyReceived(std::string_view body)
+{
+}
+
 void RootResponseHandler::sendResponse()
 {
     ESP_LOGI(TAG, "sending response for (%s:%hi)",
@@ -40,8 +44,10 @@ void RootResponseHandler::sendResponse()
                                  "</head>"
                                  "<body>"
                                      "<h1>asio test webserver</h1>"
-                                     "<a href=\"/debug\">Debug</a>"
-                                     "<a href=\"/chunked\">Chunked</a>"
+                                     "<ul>"
+                                         "<li><a href=\"/debug\">Debug</a></li>"
+                                         "<li><a href=\"/chunked\">Chunked</a></li>"
+                                     "</ul>"
                                  "</body>"
                              "</html>");
 

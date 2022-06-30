@@ -11,13 +11,14 @@
 // forward declarations
 class ClientConnection;
 
-class ErrorResponseHandler : public ResponseHandler
+class ErrorResponseHandler final : public ResponseHandler
 {
 public:
     ErrorResponseHandler(ClientConnection &clientConnection, std::string_view path);
-    ~ErrorResponseHandler() override;
+    ~ErrorResponseHandler() final;
 
     void requestHeaderReceived(std::string_view key, std::string_view value) final;
+    void requestBodyReceived(std::string_view body) final;
     void sendResponse() final;
 
 private:

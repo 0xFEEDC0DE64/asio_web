@@ -29,6 +29,10 @@ void ChunkedResponseHandler::requestHeaderReceived(std::string_view key, std::st
 {
 }
 
+void ChunkedResponseHandler::requestBodyReceived(std::string_view body)
+{
+}
+
 void ChunkedResponseHandler::sendResponse()
 {
     ESP_LOGI(TAG, "sending response (header) for (%s:%hi)",

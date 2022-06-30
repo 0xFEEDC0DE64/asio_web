@@ -30,6 +30,11 @@ void DebugResponseHandler::requestHeaderReceived(std::string_view key, std::stri
     m_requestHeaders.emplace_back(std::make_pair(std::string{key}, std::string{value}));
 }
 
+void DebugResponseHandler::requestBodyReceived(std::string_view body)
+{
+    m_requestBody += body;
+}
+
 void DebugResponseHandler::sendResponse()
 {
     ESP_LOGI(TAG, "sending response for %.*s %.*s (%s:%hi)", m_method.size(), m_method.data(), m_path.size(), m_path.data(),
@@ -56,10 +61,19 @@ void DebugResponseHandler::sendResponse()
         m_response += fmt::format(                       "<tr><th>{}</th><td>{}</td></tr>",
             pair.first, pair.second);
 
-    m_response += fmt::format(                       "</table>"
+    m_response +=                                    "</table>"
                                                  "</td>"
-                                             "</tr>"
-                                         "</tbody>"
+                                             "</tr>";
+
+    if (!m_requestBody.empty())
+    {
+        m_response += fmt::format(           "<tr>"
+                                                 "<th>Request body:</th>"
+                                                 "<td><pre>{}</pre></td>"
+                                             "</tr>", m_requestBody);
+    }
+
+    m_response +=                        "</tbody>"
                                      "</table>"
                                      "<form method=\"GET\">"
                                          "<fieldset>"
@@ -90,7 +104,7 @@ void DebugResponseHandler::sendResponse()
                                          "</fieldset>"
                                      "</form>"
                                  "</body>"
-                             "</html>");
+                             "</html>";
 
     m_response = fmt::format("HTTP/1.1 200 Ok\r\n"
                              "Content-Type: text/html\r\n"
