@@ -230,7 +230,6 @@ void WebsocketResponseHandler::sendResponse()
                              "Upgrade: websocket\r\n"
                              "Connection: Upgrade\r\n"
                              "Sec-WebSocket-Accept: {}\r\n"
-                             "Sec-WebSocket-Protocol: chat\r\n"
                              "\r\n", base64Sha1);
 
     asio::async_write(m_clientConnection.socket(),
@@ -287,5 +286,5 @@ void WebsocketResponseHandler::writtenWebsocket(std::error_code ec, std::size_t 
     ESP_LOGI(TAG, "expected=%zd actual=%zd for (%s:%hi)", m_response.size(), length,
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 
-    m_clientConnection.responseFinished(ec);
+    m_clientConnection.upgradeWebsocket();
 }
