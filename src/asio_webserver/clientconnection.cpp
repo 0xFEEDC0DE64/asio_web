@@ -14,6 +14,7 @@
 // local includes
 #include "webserver.h"
 #include "responsehandler.h"
+#include "websocketclientconnection.h"
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";
@@ -27,7 +28,7 @@ ClientConnection::ClientConnection(Webserver &webserver, asio::ip::tcp::socket s
     ESP_LOGI(TAG, "new client (%s:%hi)",
              m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
 
-    m_webserver.m_clients++;
+    m_webserver.m_httpClients++;
 }
 
 ClientConnection::~ClientConnection()
@@ -35,7 +36,7 @@ ClientConnection::~ClientConnection()
     ESP_LOGI(TAG, "client destroyed (%s:%hi)",
              m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
 
-    m_webserver.m_clients--;
+    m_webserver.m_httpClients--;
 }
 
 void ClientConnection::start()
@@ -69,7 +70,7 @@ void ClientConnection::upgradeWebsocket()
 //    ESP_LOGD(TAG, "state changed to RequestLine");
     m_state = State::WebSocket;
 
-    doReadWebSocket();
+    std::make_shared<WebsocketClientConnection>(m_webserver, std::move(m_socket), std::move(m_responseHandler))->start();
 }
 
 void ClientConnection::doRead()
@@ -77,13 +78,6 @@ void ClientConnection::doRead()
     m_socket.async_read_some(asio::buffer(m_receiveBuffer, max_length),
                              [this, self=shared_from_this()](std::error_code ec, std::size_t length)
                              { readyRead(ec, length); });
-}
-
-void ClientConnection::doReadWebSocket()
-{
-    m_socket.async_read_some(asio::buffer(m_receiveBuffer, max_length),
-                             [this, self=shared_from_this()](std::error_code ec, std::size_t length)
-                             { readyReadWebSocket(ec, length); });
 }
 
 void ClientConnection::readyRead(std::error_code ec, std::size_t length)
@@ -160,20 +154,6 @@ requestFinished:
         doRead();
 }
 
-void ClientConnection::readyReadWebSocket(std::error_code ec, std::size_t length)
-{
-    if (ec)
-    {
-        ESP_LOGI(TAG, "error: %i %s (%s:%hi)", ec.value(), ec.message().c_str(),
-                 m_remote_endpoint.address().to_string().c_str(), m_remote_endpoint.port());
-        return;
-    }
-
-    ESP_LOGV(TAG, "received: %zd \"%.*s\"", length, length, m_receiveBuffer);
-
-    doReadWebSocket();
-}
-
 bool ClientConnection::readyReadLine(std::string_view line)
 {
     switch (m_state)
@@ -203,6 +183,8 @@ bool ClientConnection::readyReadLine(std::string_view line)
 
 bool ClientConnection::parseRequestLine(std::string_view line)
 {
+//    ESP_LOGV(TAG, "%.*s", line.size(), line.data());
+
     if (const auto index = line.find(' '); index == std::string::npos)
     {
         ESP_LOGW(TAG, "invalid request line (1): \"%.*s\" (%s:%hi)", line.size(), line.data(),
@@ -250,6 +232,8 @@ bool ClientConnection::parseRequestLine(std::string_view line)
 
 bool ClientConnection::parseRequestHeader(std::string_view line)
 {
+//    ESP_LOGV(TAG, "%.*s", line.size(), line.data());
+
     if (!line.empty())
     {
         constexpr std::string_view sep{": "};

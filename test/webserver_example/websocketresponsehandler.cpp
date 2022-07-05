@@ -132,14 +132,14 @@ constexpr std::string_view html{R"END(
 WebsocketResponseHandler::WebsocketResponseHandler(ClientConnection &clientConnection) :
     m_clientConnection{clientConnection}
 {
-    ESP_LOGI(TAG, "constructed for (%s:%hi)",
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "constructed for (%s:%hi)",
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 WebsocketResponseHandler::~WebsocketResponseHandler()
 {
-    ESP_LOGI(TAG, "destructed for (%s:%hi)",
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "destructed for (%s:%hi)",
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 void WebsocketResponseHandler::requestHeaderReceived(std::string_view key, std::string_view value)

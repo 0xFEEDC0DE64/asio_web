@@ -16,14 +16,14 @@ constexpr const char * const TAG = "ASIO_WEBSERVER";
 DebugResponseHandler::DebugResponseHandler(ClientConnection &clientConnection, std::string_view method, std::string_view path, std::string_view protocol) :
     m_clientConnection{clientConnection}, m_method{method}, m_path{path}, m_protocol{protocol}
 {
-    ESP_LOGI(TAG, "constructed for %.*s %.*s (%s:%hi)", m_method.size(), m_method.data(), path.size(), path.data(),
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "constructed for %.*s %.*s (%s:%hi)", m_method.size(), m_method.data(), path.size(), path.data(),
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 DebugResponseHandler::~DebugResponseHandler()
 {
-    ESP_LOGI(TAG, "destructed for %.*s %.*s (%s:%hi)", m_method.size(), m_method.data(), m_path.size(), m_path.data(),
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "destructed for %.*s %.*s (%s:%hi)", m_method.size(), m_method.data(), m_path.size(), m_path.data(),
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 void DebugResponseHandler::requestHeaderReceived(std::string_view key, std::string_view value)

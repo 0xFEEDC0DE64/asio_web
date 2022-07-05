@@ -31,9 +31,7 @@ public:
 
 private:
     void doRead();
-    void doReadWebSocket();
     void readyRead(std::error_code ec, std::size_t length);
-    void readyReadWebSocket(std::error_code ec, std::size_t length);
     bool parseRequestLine(std::string_view line);
     bool readyReadLine(std::string_view line);
     bool parseRequestHeader(std::string_view line);

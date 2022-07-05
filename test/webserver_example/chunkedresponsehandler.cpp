@@ -16,14 +16,14 @@ constexpr const char * const TAG = "ASIO_WEBSERVER";
 ChunkedResponseHandler::ChunkedResponseHandler(ClientConnection &clientConnection) :
     m_clientConnection{clientConnection}
 {
-    ESP_LOGV(TAG, "constructed for (%s:%hi)",
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "constructed for (%s:%hi)",
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 ChunkedResponseHandler::~ChunkedResponseHandler()
 {
-    ESP_LOGV(TAG, "destructed for (%s:%hi)",
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "destructed for (%s:%hi)",
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 void ChunkedResponseHandler::requestHeaderReceived(std::string_view key, std::string_view value)

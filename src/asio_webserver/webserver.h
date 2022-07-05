@@ -24,7 +24,9 @@ public:
 
 protected:
     friend class ClientConnection;
-    std::atomic<int> m_clients;
+    friend class WebsocketClientConnection;
+    std::atomic<int> m_httpClients;
+    std::atomic<int> m_websocketClients;
 
 private:
     void doAccept();

@@ -17,14 +17,14 @@ ErrorResponseHandler::ErrorResponseHandler(ClientConnection &clientConnection, s
     m_clientConnection{clientConnection},
     m_path{path}
 {
-    ESP_LOGI(TAG, "constructed for %.*s (%s:%hi)", path.size(), path.data(),
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "constructed for %.*s (%s:%hi)", path.size(), path.data(),
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 ErrorResponseHandler::~ErrorResponseHandler()
 {
-    ESP_LOGI(TAG, "destructed for %.*s (%s:%hi)", m_path.size(), m_path.data(),
-             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
+//    ESP_LOGV(TAG, "destructed for %.*s (%s:%hi)", m_path.size(), m_path.data(),
+//             m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 }
 
 void ErrorResponseHandler::requestHeaderReceived(std::string_view key, std::string_view value)
