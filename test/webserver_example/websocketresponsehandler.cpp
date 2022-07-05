@@ -267,7 +267,7 @@ void WebsocketResponseHandler::writtenHtml(std::error_code ec, std::size_t lengt
         return;
     }
 
-    ESP_LOGI(TAG, "expected=%zd actual=%zd for (%s:%hi)", m_response.size(), length,
+    ESP_LOGI(TAG, "expected=%zd actual=%zd for (%s:%hi)", html.size(), length,
              m_clientConnection.remote_endpoint().address().to_string().c_str(), m_clientConnection.remote_endpoint().port());
 
     m_clientConnection.responseFinished(ec);

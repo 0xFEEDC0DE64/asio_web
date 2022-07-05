@@ -70,7 +70,7 @@ void ClientConnection::upgradeWebsocket()
 //    ESP_LOGD(TAG, "state changed to RequestLine");
     m_state = State::WebSocket;
 
-    std::make_shared<WebsocketClientConnection>(m_webserver, std::move(m_socket), std::move(m_responseHandler))->start();
+    std::make_shared<WebsocketClientConnection>(m_webserver, std::move(m_socket), std::move(m_parsingBuffer), std::move(m_responseHandler))->start();
 }
 
 void ClientConnection::doRead()

@@ -11,7 +11,7 @@ class ResponseHandler;
 class WebsocketClientConnection : public std::enable_shared_from_this<WebsocketClientConnection>
 {
 public:
-    WebsocketClientConnection(Webserver &webserver, asio::ip::tcp::socket socket, std::unique_ptr<ResponseHandler> &&responseHandler);
+    WebsocketClientConnection(Webserver &webserver, asio::ip::tcp::socket socket, std::string &&parsingBuffer, std::unique_ptr<ResponseHandler> &&responseHandler);
     ~WebsocketClientConnection();
 
     Webserver &webserver() { return m_webserver; }
@@ -28,14 +28,19 @@ private:
     void doReadWebSocket();
     void readyReadWebSocket(std::error_code ec, std::size_t length);
 
+    void sendMessage(bool fin, uint8_t reserved, uint8_t opcode, bool mask, std::string_view payload);
+    void onMessageSent(std::error_code ec, std::size_t length);
+
     Webserver &m_webserver;
     asio::ip::tcp::socket m_socket;
     const asio::ip::tcp::endpoint m_remote_endpoint;
 
-    std::unique_ptr<ResponseHandler> m_responseHandler;
-
-    static constexpr const std::size_t max_length = 4;
+    static constexpr const std::size_t max_length = 1024;
     char m_receiveBuffer[max_length];
 
     std::string m_parsingBuffer;
+
+    std::unique_ptr<ResponseHandler> m_responseHandler;
+
+    std::string m_sendBuffer;
 };

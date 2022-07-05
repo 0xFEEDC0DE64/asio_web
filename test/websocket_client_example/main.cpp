@@ -3,16 +3,14 @@
 // esp-idf includes
 #include <esp_log.h>
 #include <asio.hpp>
+#include <asio/ssl.hpp>
+#include <asio/buffer.hpp>
 
 // 3rdparty lib includes
 #include <cppmacros.h>
 
 // local includes
-#include "examplewebserver.h"
-
-namespace {
-constexpr const char * const TAG = "ASIO_WEBSERVER";
-} // namespace
+#include "websocketclient.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,7 +29,9 @@ int main(int argc, char *argv[])
                                       "%{message}"));
 
     asio::io_context io_context;
-    ExampleWebserver server{io_context, (unsigned short)8080};
+
+    WebsocketClient c{io_context};
+    c.start();
 
     ESP_LOGI(TAG, "running mainloop");
 

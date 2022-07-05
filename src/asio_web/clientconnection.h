@@ -32,8 +32,8 @@ public:
 private:
     void doRead();
     void readyRead(std::error_code ec, std::size_t length);
-    bool parseRequestLine(std::string_view line);
     bool readyReadLine(std::string_view line);
+    bool parseRequestLine(std::string_view line);
     bool parseRequestHeader(std::string_view line);
 
     Webserver &m_webserver;

@@ -3,6 +3,7 @@ set(headers
     src/asio_web/responsehandler.h
     src/asio_web/webserver.h
     src/asio_web/websocketclientconnection.h
+    src/asio_web/websocketstream.h
 )
 
 set(sources
@@ -10,6 +11,7 @@ set(sources
     src/asio_web/responsehandler.cpp
     src/asio_web/webserver.cpp
     src/asio_web/websocketclientconnection.cpp
+    src/asio_web/websocketstream.cpp
 )
 
 set(dependencies
