@@ -33,6 +33,6 @@ unix: {
     LIBS += -Wl,-rpath=\\\$$ORIGIN
 }
 LIBS += -L$${OUT_PWD}/..
-LIBS += -lasio_webserver
+LIBS += -lasio_web
 
 LIBS += -lssl -lcrypto

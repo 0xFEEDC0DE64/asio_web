@@ -6,8 +6,8 @@
 
 // 3rdparty lib includes
 #include <fmt/core.h>
-#include <asio_webserver/clientconnection.h>
-#include <asio_webserver/webserver.h>
+#include <asio_web/clientconnection.h>
+#include <asio_web/webserver.h>
 
 namespace {
 constexpr const char * const TAG = "ASIO_WEBSERVER";

@@ -14,7 +14,7 @@ isEmpty(FMT_DIR): error("FMT_DIR not set")
 
 include(dependencies.pri)
 
-include($$ASIO_WEBSERVER_DIR/asio_webserver_src.pri)
+include($$ASIO_WEBSERVER_DIR/asio_web_src.pri)
 include($$CPPUTILS_DIR/cpputils_src.pri)
 include($$CPPUTILS_DIR/test/cpputilstestutils_src.pri)
 include($$ESPCHRONO_DIR/espchrono_src.pri)

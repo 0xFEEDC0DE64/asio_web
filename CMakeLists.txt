@@ -1,15 +1,15 @@
 set(headers
-    src/asio_webserver/clientconnection.h
-    src/asio_webserver/responsehandler.h
-    src/asio_webserver/webserver.h
-    src/asio_webserver/websocketclientconnection.h
+    src/asio_web/clientconnection.h
+    src/asio_web/responsehandler.h
+    src/asio_web/webserver.h
+    src/asio_web/websocketclientconnection.h
 )
 
 set(sources
-    src/asio_webserver/clientconnection.cpp
-    src/asio_webserver/responsehandler.cpp
-    src/asio_webserver/webserver.cpp
-    src/asio_webserver/websocketclientconnection.cpp
+    src/asio_web/clientconnection.cpp
+    src/asio_web/responsehandler.cpp
+    src/asio_web/webserver.cpp
+    src/asio_web/websocketclientconnection.cpp
 )
 
 set(dependencies

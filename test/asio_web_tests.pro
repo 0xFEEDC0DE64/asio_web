@@ -71,7 +71,8 @@ equals(CLONE_FMT, 1) {
 }
 
 SUBDIRS += \
-    asio_webserver.pro \
+    asio_web.pro \
     webserver_example
 
-sub-webserver_example.depends += sub-asio_webserver-pro
+sub-webserver_example.depends += sub-asio_web-pro
+webserver_example.depends += sub-asio_web-pro

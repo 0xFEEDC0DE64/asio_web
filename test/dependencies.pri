@@ -5,7 +5,7 @@ isEmpty(ESPCHRONO_DIR): error("ESPCHRONO_DIR not set")
 isEmpty(EXPECTED_DIR): error("EXPECTED_DIR not set")
 isEmpty(FMT_DIR): error("FMT_DIR not set")
 
-include($$ASIO_WEBSERVER_DIR/asio_webserver.pri)
+include($$ASIO_WEBSERVER_DIR/asio_web.pri)
 include($$CPPUTILS_DIR/cpputils.pri)
 include($$CPPUTILS_DIR/test/cpputilstestutils.pri)
 include($$DATE_DIR/date.pri)
