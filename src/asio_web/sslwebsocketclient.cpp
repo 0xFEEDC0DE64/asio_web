@@ -61,7 +61,8 @@ void SslWebsocketClient::onResolved(const std::error_code &error, asio::ip::tcp:
 {
     if (error)
     {
-        ESP_LOGW(TAG, "Resolving failed: %s", error.message().c_str());
+        ESP_LOGW(TAG, "Resolving failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Resolving failed: {}", error.value(), error.message()) };
         return;
     }
 
@@ -84,7 +85,8 @@ void SslWebsocketClient::onConnected(const std::error_code &error)
 {
     if (error)
     {
-        ESP_LOGW(TAG, "Connect failed: %s", error.message().c_str());
+        ESP_LOGW(TAG, "Connect failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Connect failed: {}", error.value(), error.message()) };
         return;
     }
 
@@ -108,7 +110,8 @@ void SslWebsocketClient::onHandshaked(const std::error_code &error)
 {
     if (error)
     {
-        ESP_LOGW(TAG, "Handshake failed: %s", error.message().c_str());
+        ESP_LOGW(TAG, "SSL-Handshake failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("SSL-Handshake failed: {}", error.value(), error.message()) };
         return;
     }
 
@@ -141,8 +144,10 @@ void SslWebsocketClient::onSentRequest(const std::error_code &error, std::size_t
 {
     if (error)
     {
-        ESP_LOGW(TAG, "Write failed: %s", error.message().c_str());
+        ESP_LOGW(TAG, "Sending http request failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Sending http request failed: {}", error.value(), error.message()) };
         m_sending = std::nullopt;
+        m_socket.shutdown();
         return;
     }
 
@@ -168,7 +173,9 @@ void SslWebsocketClient::onReceivedResponse(const std::error_code &error, std::s
 {
     if (error)
     {
-        ESP_LOGI(TAG, "Read failed: %s", error.message().c_str());
+        ESP_LOGI(TAG, "Receiving http response failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Receiving http response failed: {}", error.value(), error.message()) };
+        m_socket.shutdown();
         return;
     }
 
@@ -236,27 +243,29 @@ bool SslWebsocketClient::parseResponseLine(std::string_view line)
     if (const auto index = line.find(' '); index == std::string::npos)
     {
         ESP_LOGW(TAG, "invalid response line (1): \"%.*s\"", line.size(), line.data());
-        //m_socket.close();
+        m_error = Error { .mesage = fmt::format("invalid response line (1): \"{}\"", line) };
+        m_socket.shutdown();
         return false;
     }
     else
     {
         const std::string_view protocol { line.data(), index };
-        ESP_LOGV(TAG, "response protocol: %zd \"%.*s\"", protocol.size(), protocol.size(), protocol.data());
+//        ESP_LOGV(TAG, "response protocol: %zd \"%.*s\"", protocol.size(), protocol.size(), protocol.data());
 
         if (const auto index2 = line.find(' ', index + 1); index2 == std::string::npos)
         {
             ESP_LOGW(TAG, "invalid request line (2): \"%.*s\"", line.size(), line.data());
-            //m_socket.close();
+            m_error = Error { .mesage = fmt::format("invalid response line (2): \"{}\"", line) };
+            m_socket.shutdown();
             return false;
         }
         else
         {
             const std::string_view status { line.data() + index + 1, line.data() + index2 };
-            ESP_LOGV(TAG, "response status: %zd \"%.*s\"", status.size(), status.size(), status.data());
+//            ESP_LOGV(TAG, "response status: %zd \"%.*s\"", status.size(), status.size(), status.data());
 
             const std::string_view message { line.cbegin() + index2 + 1, line.cend() };
-            ESP_LOGV(TAG, "response message: %zd \"%.*s\"", message.size(), message.size(), message.data());
+//            ESP_LOGV(TAG, "response message: %zd \"%.*s\"", message.size(), message.size(), message.data());
 
 //            ESP_LOGV(TAG, "state changed to ResponseHeaders");
             m_state = State::ResponseHeaders;
@@ -275,8 +284,9 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
         constexpr std::string_view sep{": "};
         if (const auto index = line.find(sep.data(), 0, sep.size()); index == std::string_view::npos)
         {
-            ESP_LOGW(TAG, "invalid request header: %zd \"%.*s\"", line.size(), line.size(), line.data());
-            //m_socket.close();
+            ESP_LOGW(TAG, "invalid response header: %zd \"%.*s\"", line.size(), line.size(), line.data());
+            m_error = Error { .mesage = fmt::format("invalid response header: \"{}\"", line) };
+            m_socket.shutdown();
             return false;
         }
         else
@@ -292,7 +302,8 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
                 {
                     ESP_LOGW(TAG, "invalid Content-Length %.*s %.*s", value.size(), value.data(),
                              parsed.error().size(), parsed.error().data());
-                    //m_socket.close();
+                    m_error = Error { .mesage = fmt::format("iinvalid Content-Length: \"{}\": {}", value, parsed.error()) };
+                    m_socket.shutdown();
                     return false;
                 }
                 else
@@ -336,7 +347,7 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
         else
         {
         requestFinished:
-            ESP_LOGI(TAG, "finished");
+//            ESP_LOGV(TAG, "finished");
 
             handleConnected();
 
@@ -364,7 +375,9 @@ void SslWebsocketClient::onReceiveWebsocket(const std::error_code &error, std::s
 {
     if (error)
     {
-        ESP_LOGI(TAG, "error: %i %s", error.value(), error.message().c_str());
+        ESP_LOGI(TAG, "Receiving websocket response failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Receiving websocket response failed: {}", error.value(), error.message()) };
+        m_socket.shutdown();
         return;
     }
 
@@ -535,11 +548,13 @@ void SslWebsocketClient::sendMessage(bool fin, uint8_t reserved, uint8_t opcode,
     }
 }
 
-void SslWebsocketClient::onMessageSent(std::error_code ec, std::size_t length)
+void SslWebsocketClient::onMessageSent(std::error_code error, std::size_t length)
 {
-    if (ec)
+    if (error)
     {
-        ESP_LOGW(TAG, "error: %i %s", ec.value(), ec.message().c_str());
+        ESP_LOGI(TAG, "Sending websocket message failed: %i %s", error.value(), error.message().c_str());
+        m_error = Error { .mesage = fmt::format("Sending websocket message failed: {}", error.value(), error.message()) };
+        m_socket.shutdown();
         m_sending = std::nullopt;
         m_sendingQueue = {};
         return;

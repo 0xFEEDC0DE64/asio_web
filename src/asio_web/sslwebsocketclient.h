@@ -8,6 +8,9 @@
 #include <asio.hpp>
 #include <asio/ssl.hpp>
 
+// 3rdparty lib includes
+#include <espchrono.h>
+
 class SslWebsocketClient
 {
 public:
@@ -17,7 +20,16 @@ public:
     void start();
 
     virtual void handleConnected() = 0;
+    virtual void handleDisconnected() = 0;
     virtual void handleMessage(bool fin, uint8_t reserved, uint8_t opcode, bool mask, std::string_view payload) = 0;
+
+    struct Error {
+        espchrono::millis_clock::time_point timestamp = espchrono::millis_clock::now();
+        std::string mesage;
+    };
+
+    const std::optional<Error> &error() const { return m_error; }
+    void clearError() { m_error = std::nullopt; }
 
 private:
     void resolve();
@@ -40,7 +52,7 @@ public:
     void sendMessage(bool fin, uint8_t reserved, uint8_t opcode, bool mask, std::string_view payload);
 
 private:
-    void onMessageSent(std::error_code ec, std::size_t length);
+    void onMessageSent(std::error_code error, std::size_t length);
 
     std::string m_host;
     std::string m_port;
@@ -61,4 +73,6 @@ private:
 
     std::optional<std::string> m_sending;
     std::queue<std::string> m_sendingQueue;
+
+    std::optional<Error> m_error;
 };
