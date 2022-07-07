@@ -15,8 +15,9 @@ namespace {
 constexpr const char * const TAG = "ASIO_WEB";
 } // namespace
 
-SslWebsocketClient::SslWebsocketClient(asio::io_context &io_context, std::string &&host, std::string &&path) :
+SslWebsocketClient::SslWebsocketClient(asio::io_context &io_context, std::string &&host, std::string &&port, std::string &&path) :
     m_host(std::move(host)),
+    m_port{std::move(port)},
     m_path{std::move(path)},
     m_resolver{io_context},
     m_socket{io_context, m_sslCtx}
@@ -25,8 +26,9 @@ SslWebsocketClient::SslWebsocketClient(asio::io_context &io_context, std::string
     m_socket.set_verify_mode(asio::ssl::verify_none);
 }
 
-SslWebsocketClient::SslWebsocketClient(asio::io_context &io_context, const std::string &host, const std::string &path) :
+SslWebsocketClient::SslWebsocketClient(asio::io_context &io_context, const std::string &host, const std::string &port, const std::string &path) :
     m_host{host},
+    m_port{port},
     m_path{path},
     m_resolver{io_context},
     m_socket{io_context, m_sslCtx}
@@ -45,7 +47,7 @@ void SslWebsocketClient::resolve()
 {
     ESP_LOGI(TAG, "called");
 
-    m_resolver.async_resolve(m_host, "8086",
+    m_resolver.async_resolve(m_host, m_port,
                              [this](const std::error_code &error, asio::ip::tcp::resolver::iterator iterator){
                                  onResolved(error, iterator);
                              });

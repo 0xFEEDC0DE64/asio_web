@@ -11,8 +11,8 @@
 class SslWebsocketClient
 {
 public:
-    SslWebsocketClient(asio::io_context &io_context, std::string &&host, std::string &&path);
-    SslWebsocketClient(asio::io_context &io_context, const std::string &host, const std::string &path);
+    SslWebsocketClient(asio::io_context &io_context, std::string &&host, std::string &&port, std::string &&path);
+    SslWebsocketClient(asio::io_context &io_context, const std::string &host, const std::string &port, const std::string &path);
 
     void start();
 
@@ -43,6 +43,7 @@ private:
     void onMessageSent(std::error_code ec, std::size_t length);
 
     std::string m_host;
+    std::string m_port;
     std::string m_path;
 
     asio::ip::tcp::resolver m_resolver;
