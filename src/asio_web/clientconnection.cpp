@@ -17,7 +17,7 @@
 #include "websocketclientconnection.h"
 
 namespace {
-constexpr const char * const TAG = "ASIO_WEBSERVER";
+constexpr const char * const TAG = "ASIO_WEB";
 } // namespace
 
 ClientConnection::ClientConnection(Webserver &webserver, asio::ip::tcp::socket socket) :

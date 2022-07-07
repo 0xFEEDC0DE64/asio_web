@@ -7,7 +7,7 @@
 #include "clientconnection.h"
 
 namespace {
-constexpr const char * const TAG = "ASIO_WEBSERVER";
+constexpr const char * const TAG = "ASIO_WEB";
 } // namespace
 
 Webserver::Webserver(asio::io_context &io_context, unsigned short port) :

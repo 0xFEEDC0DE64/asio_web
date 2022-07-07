@@ -15,7 +15,7 @@
 #include "websocketstream.h"
 
 namespace {
-constexpr const char * const TAG = "ASIO_WEBSERVER";
+constexpr const char * const TAG = "ASIO_WEB";
 } // namespace
 
 WebsocketClientConnection::WebsocketClientConnection(Webserver &webserver, asio::ip::tcp::socket socket,
