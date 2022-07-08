@@ -19,14 +19,15 @@ public:
 
     void start();
 
+    struct Error {
+        espchrono::millis_clock::time_point timestamp = espchrono::millis_clock::now();
+        std::string message;
+    };
+
     virtual void handleConnected() = 0;
     virtual void handleDisconnected() = 0;
     virtual void handleMessage(bool fin, uint8_t reserved, uint8_t opcode, bool mask, std::string_view payload) = 0;
-
-    struct Error {
-        espchrono::millis_clock::time_point timestamp = espchrono::millis_clock::now();
-        std::string mesage;
-    };
+    virtual void handleErrorOccured(const Error &error) = 0;
 
     const std::optional<Error> &error() const { return m_error; }
     void clearError() { m_error = std::nullopt; }
