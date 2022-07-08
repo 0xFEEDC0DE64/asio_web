@@ -145,9 +145,11 @@ void SslWebsocketClient::onSentRequest(const std::error_code &error, std::size_t
     if (error)
     {
         ESP_LOGW(TAG, "Sending http request failed: %i %s", error.value(), error.message().c_str());
-        m_error = Error { .mesage = fmt::format("Sending http request failed: {}", error.value(), error.message()) };
+        if (!m_error)
+            m_error = Error { .mesage = fmt::format("Sending http request failed: {}", error.value(), error.message()) };
         m_sending = std::nullopt;
-        m_socket.shutdown();
+        std::error_code shutdown_error;
+        m_socket.shutdown(shutdown_error);
         return;
     }
 
@@ -174,8 +176,10 @@ void SslWebsocketClient::onReceivedResponse(const std::error_code &error, std::s
     if (error)
     {
         ESP_LOGI(TAG, "Receiving http response failed: %i %s", error.value(), error.message().c_str());
-        m_error = Error { .mesage = fmt::format("Receiving http response failed: {}", error.value(), error.message()) };
-        m_socket.shutdown();
+        if (!m_error)
+            m_error = Error { .mesage = fmt::format("Receiving http response failed: {}", error.value(), error.message()) };
+        std::error_code shutdown_error;
+        m_socket.shutdown(shutdown_error);
         return;
     }
 
@@ -243,8 +247,10 @@ bool SslWebsocketClient::parseResponseLine(std::string_view line)
     if (const auto index = line.find(' '); index == std::string::npos)
     {
         ESP_LOGW(TAG, "invalid response line (1): \"%.*s\"", line.size(), line.data());
-        m_error = Error { .mesage = fmt::format("invalid response line (1): \"{}\"", line) };
-        m_socket.shutdown();
+        if (!m_error)
+            m_error = Error { .mesage = fmt::format("invalid response line (1): \"{}\"", line) };
+        std::error_code shutdown_error;
+        m_socket.shutdown(shutdown_error);
         return false;
     }
     else
@@ -255,8 +261,10 @@ bool SslWebsocketClient::parseResponseLine(std::string_view line)
         if (const auto index2 = line.find(' ', index + 1); index2 == std::string::npos)
         {
             ESP_LOGW(TAG, "invalid request line (2): \"%.*s\"", line.size(), line.data());
-            m_error = Error { .mesage = fmt::format("invalid response line (2): \"{}\"", line) };
-            m_socket.shutdown();
+            if (!m_error)
+                m_error = Error { .mesage = fmt::format("invalid response line (2): \"{}\"", line) };
+            std::error_code shutdown_error;
+            m_socket.shutdown(shutdown_error);
             return false;
         }
         else
@@ -285,8 +293,10 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
         if (const auto index = line.find(sep.data(), 0, sep.size()); index == std::string_view::npos)
         {
             ESP_LOGW(TAG, "invalid response header: %zd \"%.*s\"", line.size(), line.size(), line.data());
-            m_error = Error { .mesage = fmt::format("invalid response header: \"{}\"", line) };
-            m_socket.shutdown();
+            if (!m_error)
+                m_error = Error { .mesage = fmt::format("invalid response header: \"{}\"", line) };
+            std::error_code shutdown_error;
+            m_socket.shutdown(shutdown_error);
             return false;
         }
         else
@@ -302,8 +312,10 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
                 {
                     ESP_LOGW(TAG, "invalid Content-Length %.*s %.*s", value.size(), value.data(),
                              parsed.error().size(), parsed.error().data());
-                    m_error = Error { .mesage = fmt::format("iinvalid Content-Length: \"{}\": {}", value, parsed.error()) };
-                    m_socket.shutdown();
+                    if (!m_error)
+                        m_error = Error { .mesage = fmt::format("iinvalid Content-Length: \"{}\": {}", value, parsed.error()) };
+                    std::error_code shutdown_error;
+                    m_socket.shutdown(shutdown_error);
                     return false;
                 }
                 else
@@ -376,8 +388,10 @@ void SslWebsocketClient::onReceiveWebsocket(const std::error_code &error, std::s
     if (error)
     {
         ESP_LOGI(TAG, "Receiving websocket response failed: %i %s", error.value(), error.message().c_str());
-        m_error = Error { .mesage = fmt::format("Receiving websocket response failed: {}", error.value(), error.message()) };
-        m_socket.shutdown();
+        if (!m_error)
+            m_error = Error { .mesage = fmt::format("Receiving websocket response failed: {}", error.value(), error.message()) };
+        std::error_code shutdown_error;
+        m_socket.shutdown(shutdown_error);
         return;
     }
 
@@ -553,8 +567,10 @@ void SslWebsocketClient::onMessageSent(std::error_code error, std::size_t length
     if (error)
     {
         ESP_LOGI(TAG, "Sending websocket message failed: %i %s", error.value(), error.message().c_str());
-        m_error = Error { .mesage = fmt::format("Sending websocket message failed: {}", error.value(), error.message()) };
-        m_socket.shutdown();
+        if (!m_error)
+            m_error = Error { .mesage = fmt::format("Sending websocket message failed: {}", error.value(), error.message()) };
+        std::error_code shutdown_error;
+        m_socket.shutdown(shutdown_error);
         m_sending = std::nullopt;
         m_sendingQueue = {};
         return;
