@@ -133,6 +133,9 @@ void SslWebsocketClient::send_request()
 
     m_state = State::Request;
 
+    connectionUpgrade = false;
+    upgradeWebsocket = false;
+
     asio::async_write(m_socket,
                       asio::buffer(m_sending->data(), m_sending->size()),
                       [this](const std::error_code &error, std::size_t length) {
@@ -260,7 +263,7 @@ bool SslWebsocketClient::parseResponseLine(std::string_view line)
 
         if (const auto index2 = line.find(' ', index + 1); index2 == std::string::npos)
         {
-            ESP_LOGW(TAG, "invalid request line (2): \"%.*s\"", line.size(), line.data());
+            ESP_LOGW(TAG, "invalid response line (2): \"%.*s\"", line.size(), line.data());
             if (!m_error)
                 m_error = Error { .mesage = fmt::format("invalid response line (2): \"{}\"", line) };
             std::error_code shutdown_error;
@@ -271,6 +274,16 @@ bool SslWebsocketClient::parseResponseLine(std::string_view line)
         {
             const std::string_view status { line.data() + index + 1, line.data() + index2 };
 //            ESP_LOGV(TAG, "response status: %zd \"%.*s\"", status.size(), status.size(), status.data());
+
+            if (status != "101")
+            {
+                ESP_LOGW(TAG, "invalid response status: \"%.*s\"", status.size(), status.data());
+                if (!m_error)
+                    m_error = Error { .mesage = fmt::format("invalid response status: \"{}\"", status) };
+                std::error_code shutdown_error;
+                m_socket.shutdown(shutdown_error);
+                return false;
+            }
 
             const std::string_view message { line.cbegin() + index2 + 1, line.cend() };
 //            ESP_LOGV(TAG, "response message: %zd \"%.*s\"", message.size(), message.size(), message.data());
@@ -313,13 +326,23 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
                     ESP_LOGW(TAG, "invalid Content-Length %.*s %.*s", value.size(), value.data(),
                              parsed.error().size(), parsed.error().data());
                     if (!m_error)
-                        m_error = Error { .mesage = fmt::format("iinvalid Content-Length: \"{}\": {}", value, parsed.error()) };
+                        m_error = Error { .mesage = fmt::format("invalid Content-Length: \"{}\": {}", value, parsed.error()) };
                     std::error_code shutdown_error;
                     m_socket.shutdown(shutdown_error);
                     return false;
                 }
                 else
                     m_responseBodySize = *parsed;
+            }
+            else if (cpputils::stringEqualsIgnoreCase(key, "Connection"))
+            {
+                if (cpputils::stringEqualsIgnoreCase(value, "Upgrade"))
+                    connectionUpgrade = true;
+            }
+            else if (cpputils::stringEqualsIgnoreCase(key, "Upgrade"))
+            {
+                if (value.contains("websocket") || value.contains("Websocket"))
+                    upgradeWebsocket = true;
             }
 
             return true;
@@ -359,6 +382,25 @@ bool SslWebsocketClient::parseResponseHeader(std::string_view line)
         else
         {
         requestFinished:
+            if (!connectionUpgrade)
+            {
+                ESP_LOGW(TAG, "header Connection: Upgrade missing");
+                if (!m_error)
+                    m_error = Error { .mesage = "header Connection: Upgrade missing" };
+                std::error_code shutdown_error;
+                m_socket.shutdown(shutdown_error);
+                return false;
+            }
+            if (!upgradeWebsocket)
+            {
+                ESP_LOGW(TAG, "header Upgrade: websocket missing");
+                if (!m_error)
+                    m_error = Error { .mesage = "header Upgrade: websocket missing" };
+                std::error_code shutdown_error;
+                m_socket.shutdown(shutdown_error);
+                return false;
+            }
+
 //            ESP_LOGV(TAG, "finished");
 
             handleConnected();

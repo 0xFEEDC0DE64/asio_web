@@ -67,6 +67,9 @@ private:
     enum class State { Request, ResponseLine, ResponseHeaders, ResponseBody, WebSocket };
     State m_state { State::Request };
 
+    bool connectionUpgrade;
+    bool upgradeWebsocket;
+
     std::string m_parsingBuffer;
 
     std::size_t m_responseBodySize{};
