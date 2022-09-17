@@ -519,7 +519,7 @@ again:
         payloadLength = __builtin_bswap16(*(const uint16_t *)(&*iter));
         std::advance(iter, sizeof(uint16_t));
 
-        ESP_LOGI(TAG, "16bit payloadLength: %u", payloadLength);
+        ESP_LOGI(TAG, "16bit payloadLength: %llu", payloadLength);
     }
     else if (hdr.payloadLength == 127)
     {
@@ -533,7 +533,7 @@ again:
         payloadLength = *(const uint64_t *)(&*iter);
         std::advance(iter, sizeof(uint64_t));
 
-        ESP_LOGI(TAG, "64bit payloadLength: %u", payloadLength);
+        ESP_LOGI(TAG, "64bit payloadLength: %llu", payloadLength);
     }
 
     if (hdr.mask)

@@ -124,7 +124,7 @@ again:
         payloadLength = *(const uint64_t *)(&*iter);
         std::advance(iter, sizeof(uint64_t));
 
-        ESP_LOGI(TAG, "64bit payloadLength: %u", payloadLength);
+        ESP_LOGI(TAG, "64bit payloadLength: %llu", payloadLength);
     }
 
     if (hdr.mask)
@@ -167,9 +167,9 @@ again:
         return;
     }
 
-    ESP_LOGI(TAG, "remaining: %zd %lu", std::distance(iter, std::end(m_parsingBuffer)), payloadLength);
+    ESP_LOGI(TAG, "remaining: %zd %llu", std::distance(iter, std::end(m_parsingBuffer)), payloadLength);
 
-    ESP_LOGI(TAG, "payload: %.*s", payloadLength, &*iter);
+    ESP_LOGI(TAG, "payload: %.*s", int(payloadLength), &*iter);
 
     std::advance(iter, payloadLength);
     m_parsingBuffer.erase(std::begin(m_parsingBuffer), iter);
